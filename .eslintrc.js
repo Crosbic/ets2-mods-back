@@ -1,40 +1,39 @@
 module.exports = {
-  parser: "@typescript-eslint/parser",
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: "tsconfig.json",
+    project: 'tsconfig.json',
     tsconfigRootDir: __dirname,
-    sourceType: "module",
+    sourceType: 'module',
   },
-  plugins: ["@typescript-eslint/eslint-plugin", "prettier"],
+  plugins: [
+    '@typescript-eslint/eslint-plugin',
+    'simple-import-sort',
+    'unused-imports',
+  ],
   extends: [
-    "eslint:recommended",
-    "prettier",
-    "plugin:@typescript-eslint/recommended",
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
   ],
   root: true,
   env: {
     node: true,
     jest: true,
   },
-  ignorePatterns: [".eslintrc.js"],
+  ignorePatterns: ['.eslintrc.js'],
   rules: {
-    "@typescript-eslint/interface-name-prefix": "off",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/no-explicit-any": "off",
-    "prettier/prettier": [
-      "error",
+    'unused-imports/no-unused-imports': 'error',
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'prettier/prettier': [
+      'error',
       {
-        endOfLine: "auto",
+        endOfLine: 'auto',
       },
     ],
-    semi: "off",
-    "newline-before-return": "warn",
-    eqeqeq: "error",
-    curly: "warn",
+    semi: 'off',
   },
-  globals: {
-    JSX: true,
-  },
-};
+}
