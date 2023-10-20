@@ -1,38 +1,60 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
 import { UserEntity } from '../users/entities/user.entity'
 import { UsersService } from '../users/users.service'
+import { SignInDto } from './dto/SignIn.dto'
 import { SignUpDto } from './dto/SignUp.dto'
+import { AuthResponse } from './types/AuthResponse'
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+  @Inject()
+  private readonly usersService: UsersService
 
-    @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>
-  ) {}
+  @Inject()
+  private readonly jwtService: JwtService
 
-  async signUp(userDto: SignUpDto): Promise<UserEntity> {
-    const newUser = this.usersRepository.create(userDto)
-    return this.usersRepository.save(newUser)
+  @Inject()
+  private readonly configService: ConfigService
+
+  @InjectRepository(UserEntity)
+  private readonly usersRepository: Repository<UserEntity>
+
+  public async signUp(userDto: SignUpDto): Promise<AuthResponse> {
+    const user = this.usersRepository.create(userDto)
+    const savedUser = await this.usersRepository.save(user)
+
+    return this.generateTokens(savedUser)
   }
 
-  async signIn(username: string, pass: string): Promise<any> {
+  public async signIn(userDto: SignInDto): Promise<AuthResponse> {
+    const { username, password } = userDto
     const user = await this.usersService.findOne(username)
-    if (user?.password !== pass) {
+
+    if (user?.password !== password) {
       throw new UnauthorizedException()
     }
+
+    return this.generateTokens(user)
+  }
+
+  private generateTokens(user: UserEntity): AuthResponse {
     const payload = {
-      sub: user.id,
+      id: user.id,
       username: user.username,
     }
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_ACCESS_SECRET'),
+      expiresIn: '60s',
+    })
+
     return {
-      acces_token: await this.jwtService.signAsync(payload),
+      access_token: accessToken,
     }
   }
 }
